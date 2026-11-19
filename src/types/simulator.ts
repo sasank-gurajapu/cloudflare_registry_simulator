@@ -16,7 +16,7 @@ export interface Product {
   ucpEndpoint: string;
 }
 
-export interface WalmartProduct {
+export interface RetailProduct {
   id: string;
   title: string;
   price: number;
@@ -41,13 +41,21 @@ export interface AgentLogEntry {
   latencyMs: number;
 }
 
-export interface MetricDataPoint {
-  time: string;
-  visitors: number;
-  requests: number;
-  cached: number;
-  agentRequests: number;
+export interface AITrendItem {
+  id: string;
+  query: string;
+  volume: string;
+  growth: string;
+  started: string;
+  isActive: boolean;
+  sparklinePoints: number[];
+  categoryBreakdown: {
+    category: string;
+    percentage: number;
+    queryCount: string;
+  }[];
+  agentSummary: string;
 }
 
-export type SimulatorTab = 'merchant' | 'shopper' | 'registry';
+export type SimulatorTab = 'merchant' | 'shopper';
 export type MerchantSection = 'overview' | 'agent-readiness' | 'analytics' | 'caching' | 'dns';

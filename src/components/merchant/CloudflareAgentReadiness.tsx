@@ -3,63 +3,114 @@ import { useSimulator } from '../../context/SimulatorContext';
 import { 
   Bot, 
   Sparkles, 
-  CheckCircle2, 
-  Code2, 
   TrendingUp, 
-  Copy, 
-  Check, 
   ShoppingBag,
+  ChevronDown,
+  Calendar,
+  Layers,
   ArrowUpRight,
-  Zap,
-  Globe,
-  Radio
+  Filter
 } from 'lucide-react';
+import { AITrendItem } from '../../types/simulator';
 
 export const CloudflareAgentReadiness: React.FC = () => {
   const { 
-    domain, 
-    merchantName,
     isOptedIn, 
     toggleOptIn, 
     products, 
-    agentLogs, 
-    metrics 
+    metrics, 
+    aiTrends, 
+    selectedTrend, 
+    setSelectedTrend 
   } = useSimulator();
 
-  const [copiedUcp, setCopiedUcp] = useState(false);
-  const [showJsonPreview, setShowJsonPreview] = useState(false);
+  // Mini sparkline SVG generator
+  const renderSparkline = (points: number[], isSelected: boolean = false) => {
+    const max = Math.max(...points);
+    const min = Math.min(...points);
+    const range = max - min || 1;
+    const width = 120;
+    const height = 36;
+    
+    const svgPoints = points
+      .map((p, i) => {
+        const x = (i / (points.length - 1)) * width;
+        const y = height - ((p - min) / range) * (height - 8) - 4;
+        return `${x},${y}`;
+      })
+      .join(' ');
 
-  const ucpManifest = {
-    "@context": "https://ucp.network/v1",
-    "@type": "MerchantIndex",
-    "registryId": "cf-parda-77291",
-    "status": isOptedIn ? "PUBLISHED_ACTIVE" : "DRAFT_OFFLINE",
-    "merchant": {
-      "name": merchantName,
-      "domain": domain,
-      "type": "IndependentBrand",
-      "country": "US",
-      "currency": "USD",
-      "trustScore": "0.99 (Verified Cloudflare Origin)"
-    },
-    "catalogEndpoint": `https://${domain}/api/ucp/catalog.json`,
-    "agentPurchaseEndpoint": `https://${domain}/api/ucp/checkout`,
-    "productsCount": products.length,
-    "productsSample": products.map(p => ({
-      id: p.id,
-      title: p.title,
-      price: p.price,
-      currency: p.currency,
-      availability: p.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      category: p.category,
-      directUcpUrl: p.ucpEndpoint
-    }))
+    return (
+      <svg className="w-28 h-9 overflow-visible" viewBox={`0 0 ${width} ${height}`}>
+        <polyline
+          fill="none"
+          stroke={isSelected ? '#34D399' : '#10B981'}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          points={svgPoints}
+        />
+      </svg>
+    );
   };
 
-  const handleCopyJson = () => {
-    navigator.clipboard.writeText(JSON.stringify(ucpManifest, null, 2));
-    setCopiedUcp(true);
-    setTimeout(() => setCopiedUcp(false), 2000);
+  // Detailed larger chart for the granular breakdown panel
+  const renderLargeSparkline = (points: number[]) => {
+    const max = Math.max(...points);
+    const min = Math.min(...points);
+    const range = max - min || 1;
+    const width = 360;
+    const height = 110;
+    
+    const linePoints = points.map((p, i) => {
+      const x = (i / (points.length - 1)) * width;
+      const y = height - ((p - min) / range) * (height - 20) - 10;
+      return { x, y };
+    });
+
+    const polylineStr = linePoints.map(pt => `${pt.x},${pt.y}`).join(' ');
+    const areaStr = `0,${height} ` + polylineStr + ` ${width},${height}`;
+
+    return (
+      <div className="relative w-full h-28 my-3">
+        <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
+            </linearGradient>
+          </defs>
+          {/* Subtle grid lines */}
+          <line x1="0" y1="30" x2={width} y2="30" stroke="#334155" strokeDasharray="3 3" opacity="0.4" />
+          <line x1="0" y1="70" x2={width} y2="70" stroke="#334155" strokeDasharray="3 3" opacity="0.4" />
+          
+          <polygon fill="url(#trendGradient)" points={areaStr} />
+          <polyline
+            fill="none"
+            stroke="#10B981"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            points={polylineStr}
+          />
+          {/* Current dot */}
+          {linePoints.length > 0 && (
+            <circle
+              cx={linePoints[linePoints.length - 1].x}
+              cy={linePoints[linePoints.length - 1].y}
+              r="4.5"
+              fill="#34D399"
+              stroke="#064E3B"
+              strokeWidth="2"
+            />
+          )}
+        </svg>
+        <div className="flex justify-between text-[11px] text-gray-400 font-mono mt-1">
+          <span>7 days ago</span>
+          <span>now</span>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -81,7 +132,7 @@ export const CloudflareAgentReadiness: React.FC = () => {
         </div>
 
         {/* Global Opt-In Switch */}
-        <div className="flex items-center space-x-3 bg-gray-50 border border-gray-200 px-5 py-3 rounded-2xl shadow-xs self-start sm:self-auto">
+        <div className="flex items-center space-x-3.5 bg-gray-50 border border-gray-200 px-5 py-3 rounded-2xl shadow-xs self-start sm:self-auto">
           <div className="text-right">
             <div className="text-sm font-bold text-gray-900">
               {isOptedIn ? 'AI Discovery: ACTIVE' : 'AI Discovery: OFF'}
@@ -109,7 +160,7 @@ export const CloudflareAgentReadiness: React.FC = () => {
         </div>
       </div>
 
-      {/* STATE 1: WHEN TOGGLED OFF (Nothing on screen except clean opt-in CTA) */}
+      {/* STATE 1: WHEN TOGGLED OFF (Clean minimal screen, no clutter) */}
       {!isOptedIn ? (
         <div className="flex flex-col items-center justify-center py-20 text-center max-w-xl mx-auto space-y-6">
           <div className="w-16 h-16 rounded-3xl bg-orange-50 border border-orange-200 text-cf-orange flex items-center justify-center shadow-xs">
@@ -135,53 +186,11 @@ export const CloudflareAgentReadiness: React.FC = () => {
           </button>
         </div>
       ) : (
-        /* STATE 2: WHEN TOGGLED ON (Bunch of rich stats, visits, charts, real-time feed!) */
+        /* STATE 2: WHEN TOGGLED ON */
         <div className="space-y-8 animate-fade-in">
-          {/* Active Status Ribbon */}
-          <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex items-center space-x-3">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-              </span>
-              <div>
-                <span className="text-sm font-bold text-emerald-900">
-                  ParDa is Live & Discoverable on Cloudflare Open Registry
-                </span>
-                <span className="text-xs text-emerald-700 ml-2 font-mono">
-                  https://{domain}/.well-known/ucp.json
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2 self-end md:self-auto">
-              <button
-                onClick={handleCopyJson}
-                className="px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition flex items-center space-x-1 cursor-pointer"
-              >
-                {copiedUcp ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-emerald-600" />}
-                <span>{copiedUcp ? 'Copied UCP' : 'Copy UCP Manifest'}</span>
-              </button>
-              <button
-                onClick={() => setShowJsonPreview(!showJsonPreview)}
-                className="px-3 py-1.5 bg-white border border-emerald-300 rounded-lg text-xs font-semibold text-emerald-800 hover:bg-emerald-50 transition cursor-pointer"
-              >
-                {showJsonPreview ? 'Hide Schema' : 'View Schema'}
-              </button>
-            </div>
-          </div>
-
-          {/* Raw JSON Schema Drawer (Optional toggle) */}
-          {showJsonPreview && (
-            <div className="p-5 bg-slate-900 text-slate-100 font-mono text-xs rounded-2xl overflow-x-auto max-h-72 shadow-lg border border-slate-800">
-              <pre>{JSON.stringify(ucpManifest, null, 2)}</pre>
-            </div>
-          )}
-
-          {/* 4 Rich KPI Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Card 1: AI Agent Visits */}
-            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2 hover:border-gray-300 transition">
+          {/* Key Metrics Cards (Clean, visits + queries + products) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">AI Referral Visits</span>
                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center">
@@ -196,12 +205,11 @@ export const CloudflareAgentReadiness: React.FC = () => {
               </div>
             </div>
 
-            {/* Card 2: AI Queries Today */}
-            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2 hover:border-gray-300 transition">
+            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent Queries Today</span>
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex items-center">
-                  <Radio className="w-3 h-3 mr-0.5 animate-pulse" /> Live
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                  Live Index
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-cf-blue font-mono">
@@ -212,12 +220,11 @@ export const CloudflareAgentReadiness: React.FC = () => {
               </div>
             </div>
 
-            {/* Card 3: UCP Synced Products */}
-            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2 hover:border-gray-300 transition">
+            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Synced Catalog</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Synced Products</span>
                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                  100% Valid
+                  100% UCP
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-gray-900">
@@ -227,145 +234,202 @@ export const CloudflareAgentReadiness: React.FC = () => {
                 Machine-readable UCP endpoints
               </div>
             </div>
-
-            {/* Card 4: Est. Direct Inquiries */}
-            <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2 hover:border-gray-300 transition">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Estimated GMV</span>
-                <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
-                  0% Fee
-                </span>
-              </div>
-              <div className="text-3xl font-extrabold text-gray-900">
-                $2,480
-              </div>
-              <div className="text-xs text-gray-400">
-                Direct to store (no marketplace cut)
-              </div>
-            </div>
           </div>
 
-          {/* Two-Column Analytics Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Column (7 cols): Synced Products & Agent Distribution */}
-            <div className="lg:col-span-7 space-y-6">
-              {/* Product Catalog Card */}
-              <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
-                    <ShoppingBag className="w-4 h-4 text-cf-orange" />
-                    <span>Active Products in UCP Registry ({products.length})</span>
-                  </h3>
-                  <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full">
-                    Auto-Synced via Edge Worker
+          {/* NEW SECTION: AI SHOPPING TRENDS (Inspired directly by Google Trends) */}
+          <div className="bg-[#1E1F20] text-gray-100 rounded-2xl p-6 lg:p-7 shadow-lg border border-[#303134] space-y-6">
+            {/* Trends Section Header & Filter Pills */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#303134]">
+              <div>
+                <div className="flex items-center space-x-2 text-xs text-emerald-400 font-bold uppercase tracking-wider">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>AI Agent Search Intelligence</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white mt-1">
+                  AI Shopping Trends
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  Macro shopper queries from AI agents aggregated into categories and demand volume.
+                </p>
+              </div>
+
+              {/* Filter Pills (Google Trends Style) */}
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
+                  <span>United States</span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                </div>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
+                  <Calendar className="w-3 h-3 text-gray-400" />
+                  <span>Past 7 days</span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                </div>
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
+                  <ShoppingBag className="w-3 h-3 text-gray-400" />
+                  <span>Shopping</span>
+                  <ChevronDown className="w-3 h-3 text-gray-400" />
+                </div>
+              </div>
+            </div>
+
+            {/* Master-Detail Trends View (Matching Google Trends screenshot) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Macro Trends Table (7 columns) */}
+              <div className="lg:col-span-7 overflow-x-auto">
+                <table className="w-full text-left text-xs font-sans">
+                  <thead>
+                    <tr className="border-b border-[#303134] text-gray-400 text-[11px] font-semibold">
+                      <th className="pb-3 pl-2">AI Search Query</th>
+                      <th className="pb-3 px-3">Volume</th>
+                      <th className="pb-3 px-3">Started</th>
+                      <th className="pb-3 pr-2 text-right">Past 7 days</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#2B2C2F]">
+                    {aiTrends.map((trend) => {
+                      const isSelected = selectedTrend.id === trend.id;
+                      return (
+                        <tr
+                          key={trend.id}
+                          onClick={() => setSelectedTrend(trend)}
+                          className={`cursor-pointer transition group ${
+                            isSelected 
+                              ? 'bg-[#2B2C2F] text-white font-medium' 
+                              : 'hover:bg-[#252628] text-gray-300'
+                          }`}
+                        >
+                          {/* Query & Selection indicator */}
+                          <td className="py-3.5 pl-2">
+                            <div className="flex items-center space-x-2.5">
+                              <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-emerald-400' : 'bg-transparent group-hover:bg-gray-600'}`}></div>
+                              <span className="text-sm font-semibold group-hover:text-white transition">
+                                {trend.query}
+                              </span>
+                            </div>
+                          </td>
+
+                          {/* Volume & Growth */}
+                          <td className="py-3.5 px-3 font-mono">
+                            <div className="text-xs font-bold text-gray-100">{trend.volume}</div>
+                            <div className="text-[10px] text-emerald-400 font-semibold">{trend.growth}</div>
+                          </td>
+
+                          {/* Started & Active Status */}
+                          <td className="py-3.5 px-3">
+                            <div className="text-xs text-gray-300">{trend.started}</div>
+                            <div className="text-[10px] text-emerald-400 flex items-center space-x-1 mt-0.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                              <span>Active</span>
+                            </div>
+                          </td>
+
+                          {/* Sparkline Graph */}
+                          <td className="py-3.5 pr-2 text-right">
+                            <div className="flex justify-end">
+                              {renderSparkline(trend.sparklinePoints, isSelected)}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Granular Category Breakdown Panel (5 columns, matching image 4) */}
+              <div className="lg:col-span-5 bg-[#252628] border border-[#3C4043] rounded-2xl p-5 space-y-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">
+                      Granular Breakdown
+                    </span>
+                    <h3 className="text-lg font-bold text-white mt-0.5">
+                      {selectedTrend.query}
+                    </h3>
+                  </div>
+                  <span className="text-xs bg-[#303134] text-gray-300 px-2.5 py-1 rounded-full font-mono">
+                    {selectedTrend.volume} total
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  {products.map(p => (
-                    <div key={p.id} className="p-3.5 border border-gray-200 rounded-xl flex items-center justify-between hover:border-gray-300 transition">
-                      <div className="flex items-center space-x-3.5">
-                        <img src={p.imageUrl} alt={p.title} className="w-12 h-12 object-cover rounded-lg border border-gray-100" />
-                        <div>
-                          <div className="text-sm font-bold text-gray-900 line-clamp-1">{p.title}</div>
-                          <div className="text-xs text-cf-orange font-bold mt-0.5">${p.price} <span className="text-[10px] text-gray-400 font-normal">USD</span></div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">
-                          {p.stockCount} in stock
-                        </span>
-                        <div className="text-[11px] text-gray-400 font-mono mt-0.5">{p.id}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                {/* Prominent Trend Graph */}
+                {renderLargeSparkline(selectedTrend.sparklinePoints)}
 
-              {/* Agent Breakdown */}
-              <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-4">
-                <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
-                  <Bot className="w-4 h-4 text-cf-blue" />
-                  <span>Traffic by AI Assistant</span>
-                </h3>
-
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-gray-700">ChatGPT (OpenAI Agent)</span>
-                      <span className="text-gray-900">65% (18 queries)</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '65%' }}></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-gray-700">Claude (Anthropic)</span>
-                      <span className="text-gray-900">22% (6 queries)</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div className="bg-cf-orange h-2 rounded-full" style={{ width: '22%' }}></div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between text-xs font-semibold mb-1">
-                      <span className="text-gray-700">Perplexity AI</span>
-                      <span className="text-gray-900">13% (4 queries)</span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div className="bg-cf-blue h-2 rounded-full" style={{ width: '13%' }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column (5 cols): Live Inquiries Stream */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-4 h-full flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
-                      <Zap className="w-4 h-4 text-amber-500" />
-                      <span>Live AI Inquiries Feed</span>
-                    </h3>
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-mono">
-                      Real-time
+                {/* Sub-Category Aggregated Intent */}
+                <div className="space-y-3 pt-1 border-t border-[#35373A]">
+                  <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
+                    <span className="flex items-center space-x-1">
+                      <Layers className="w-3.5 h-3.5 text-cf-orange" />
+                      <span>Aggregated Category Distribution</span>
                     </span>
+                    <span className="text-gray-400 text-[11px]">Share</span>
                   </div>
 
-                  {/* List of query events */}
-                  <div className="space-y-3">
-                    {agentLogs.slice(0, 5).map((log) => (
-                      <div key={log.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 space-y-1.5 hover:bg-gray-100/70 transition">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-gray-900 flex items-center space-x-1.5">
-                            <span className="w-2 h-2 rounded-full bg-cf-blue"></span>
-                            <span>{log.agent}</span>
+                  <div className="space-y-2.5">
+                    {selectedTrend.categoryBreakdown.map((item, idx) => (
+                      <div key={idx} className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-gray-300">{item.category}</span>
+                          <span className="font-mono text-gray-200 font-semibold">
+                            {item.percentage}% ({item.queryCount})
                           </span>
-                          <span className="text-[11px] text-gray-400 font-mono">{log.timestamp}</span>
                         </div>
-                        <div className="text-xs text-gray-700 italic">
-                          "{log.query}"
-                        </div>
-                        <div className="flex items-center justify-between text-[11px] pt-1 border-t border-gray-200/60">
-                          <span className="text-emerald-700 font-semibold">
-                            {log.outcome}
-                          </span>
-                          <span className="text-gray-400 font-mono">{log.latencyMs}ms</span>
+                        <div className="w-full bg-[#35373A] rounded-full h-1.5">
+                          <div 
+                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
+                            style={{ width: `${item.percentage}%` }}
+                          />
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl text-xs text-blue-900 mt-4">
-                  💡 <strong>Test it in real time:</strong> Switch to the <strong>Shopper (ChatGPT)</strong> tab, submit a query like <em>"Women's bag under $200"</em>, and watch the query and visitor count update here immediately!
+                {/* Agent Query Insight Summary */}
+                <div className="p-3 bg-[#1E1F20] border border-[#3C4043] rounded-xl text-xs text-gray-300 space-y-1">
+                  <div className="font-bold text-white flex items-center space-x-1.5">
+                    <Bot className="w-3.5 h-3.5 text-cf-blue" />
+                    <span>AI Shopper Query Pattern:</span>
+                  </div>
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    {selectedTrend.agentSummary}
+                  </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Active Synced Product Catalog */}
+          <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
+                <ShoppingBag className="w-4 h-4 text-cf-orange" />
+                <span>Active Products in UCP Registry ({products.length})</span>
+              </h3>
+              <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded-full">
+                Auto-Synced via Edge Worker
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {products.map(p => (
+                <div key={p.id} className="p-4 border border-gray-200 rounded-xl hover:border-gray-300 transition space-y-2.5">
+                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
+                    <img src={p.imageUrl} alt={p.title} className="w-full h-full object-cover" />
+                    <div className="absolute bottom-2 right-2 bg-cf-orange text-white font-bold text-xs px-2 py-0.5 rounded shadow">
+                      ${p.price}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-gray-900 line-clamp-1">{p.title}</div>
+                    <div className="text-xs text-gray-500 line-clamp-1 mt-0.5">{p.category}</div>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-100 text-xs">
+                    <span className="text-emerald-600 font-semibold">{p.stockCount} in stock</span>
+                    <span className="font-mono text-gray-400 text-[11px]">{p.id}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

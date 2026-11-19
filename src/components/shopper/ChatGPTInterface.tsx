@@ -67,11 +67,9 @@ export const ChatGPTInterface: React.FC = () => {
 
   return (
     <div className="flex h-full w-full bg-[#212121] text-[#ECECEC] font-sans overflow-hidden select-none">
-      {/* ChatGPT Dark Sidebar (Mirrors reference image 3) */}
+      {/* ChatGPT Dark Sidebar */}
       <aside className="w-72 bg-[#171717] border-r border-[#2F2F2F] flex flex-col justify-between p-4 hidden lg:flex text-sm flex-shrink-0">
-        {/* Top items */}
         <div className="space-y-5">
-          {/* Header */}
           <div className="flex items-center justify-between px-2 py-1">
             <button className="flex items-center space-x-2 text-white font-semibold hover:bg-[#212121] px-3 py-2 rounded-xl transition text-base">
               <span>ChatGPT</span>
@@ -82,7 +80,6 @@ export const ChatGPTInterface: React.FC = () => {
             </button>
           </div>
 
-          {/* Nav Links */}
           <div className="space-y-1.5 text-[#C4C4C4] text-sm">
             <button
               onClick={resetChat}
@@ -130,7 +127,6 @@ export const ChatGPTInterface: React.FC = () => {
           </div>
         </div>
 
-        {/* Bottom promo box from image 3 */}
         <div className="bg-[#212121] border border-[#2F2F2F] rounded-2xl p-4 space-y-3">
           <div className="text-sm font-bold text-white">Get responses tailored to you</div>
           <p className="text-xs text-[#A0A0A0] leading-relaxed">
@@ -174,7 +170,7 @@ export const ChatGPTInterface: React.FC = () => {
         {/* Message Area */}
         <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8">
           {messages.length === 0 ? (
-            /* Empty State / Welcome Screen directly matching image 3 */
+            /* Welcome Screen */
             <div className="h-full flex flex-col items-center justify-center max-w-3xl mx-auto text-center space-y-8 my-auto pt-12">
               <h2 className="text-4xl font-bold text-white tracking-tight">
                 Where should we begin?
@@ -216,9 +212,9 @@ export const ChatGPTInterface: React.FC = () => {
                 </span>{' '}
                 to the Cloudflare Registry.{' '}
                 {isOptedIn ? (
-                  <span>AI agents will discover ParDa in UCP format.</span>
+                  <span>AI agent recommendations include ParDa alongside major retailers.</span>
                 ) : (
-                  <span>Only major retailers like Walmart will appear in search results.</span>
+                  <span>Only major retailers (Walmart, Target) will appear in search results.</span>
                 )}
               </div>
             </div>
@@ -228,16 +224,13 @@ export const ChatGPTInterface: React.FC = () => {
               {messages.map((msg) => (
                 <div key={msg.id} className="space-y-4">
                   {msg.sender === 'user' ? (
-                    /* User Bubble */
                     <div className="flex justify-end">
                       <div className="bg-[#2F2F2F] text-[#ECECEC] px-5 py-3 rounded-3xl max-w-xl text-base border border-[#3E3E3E] shadow-sm leading-relaxed">
                         {msg.content}
                       </div>
                     </div>
                   ) : (
-                    /* Assistant Response */
                     <div className="flex items-start space-x-4">
-                      {/* ChatGPT Green Icon Avatar */}
                       <div className="w-8 h-8 rounded-full bg-[#10A37F] flex items-center justify-center flex-shrink-0 mt-0.5 text-white font-bold text-sm shadow-md">
                         <Sparkles className="w-4 h-4" />
                       </div>
@@ -260,11 +253,11 @@ export const ChatGPTInterface: React.FC = () => {
                               <span className="text-gray-400">Registry Result:</span>
                               {msg.queryResults.isFromCloudflareRegistry ? (
                                 <span className="text-emerald-400 font-semibold">
-                                  ✓ ParDa UCP Manifest Indexed (parda.com)
+                                  ✓ ParDa UCP Indexed + Major Retail Match
                                 </span>
                               ) : (
                                 <span className="text-gray-400 font-semibold">
-                                  Standard Web Index (Major Retail Stores)
+                                  Standard Web Index (Walmart, Target)
                                 </span>
                               )}
                             </div>
@@ -275,115 +268,110 @@ export const ChatGPTInterface: React.FC = () => {
                           {msg.content}
                         </div>
 
-                        {/* If From Cloudflare Registry: Show ParDa Merchant Products */}
-                        {msg.queryResults?.isFromCloudflareRegistry && msg.queryResults.merchantProducts && (
-                          <div className="space-y-4 mt-2">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {msg.queryResults.merchantProducts.map((p) => (
-                                <div
-                                  key={p.id}
-                                  className="bg-[#262626] border border-[#3E3E3E] rounded-2xl p-4 space-y-3 hover:border-cf-orange transition group shadow-md"
-                                >
-                                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black/40">
-                                    <img
-                                      src={p.imageUrl}
-                                      alt={p.title}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                    />
-                                    <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center space-x-1.5 shadow-sm">
-                                      <CheckCircle className="w-3.5 h-3.5" />
-                                      <span>Cloudflare UCP Verified</span>
-                                    </div>
-                                    <div className="absolute bottom-2.5 right-2.5 bg-cf-orange text-white font-extrabold text-sm px-2.5 py-1 rounded-lg shadow-md">
-                                      ${p.price} USD
-                                    </div>
+                        {/* PRODUCT CARDS DISPLAY */}
+                        <div className="space-y-4 mt-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* IF OPTED IN: Show 1 from ParDa AND 1 from Walmart! */}
+                            {msg.queryResults?.isFromCloudflareRegistry && msg.queryResults.merchantProducts?.map((p) => (
+                              <div
+                                key={p.id}
+                                className="bg-[#262626] border border-[#3E3E3E] rounded-2xl p-4 space-y-3 hover:border-cf-orange transition group shadow-md"
+                              >
+                                <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black/40">
+                                  <img
+                                    src={p.imageUrl}
+                                    alt={p.title}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                  />
+                                  <div className="absolute top-2.5 left-2.5 bg-black/80 backdrop-blur-md text-emerald-400 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center space-x-1.5 shadow-sm">
+                                    <CheckCircle className="w-3.5 h-3.5" />
+                                    <span>Cloudflare UCP Verified</span>
                                   </div>
-
-                                  <div>
-                                    <div className="text-base font-bold text-white line-clamp-1">{p.title}</div>
-                                    <div className="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">
-                                      {p.description}
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center justify-between pt-2 border-t border-[#333] text-xs">
-                                    <span className="text-gray-400 font-medium">Merchant:</span>
-                                    <span className="text-cf-orange font-bold font-mono">parda.com</span>
-                                  </div>
-
-                                  {/* In-App Mock Actions (No actual redirect) */}
-                                  <div className="flex items-center space-x-2 pt-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleProductCardClick(p.title, "View Details")}
-                                      className="flex-1 py-2 bg-[#333] hover:bg-[#444] text-white rounded-xl text-center text-xs font-semibold transition cursor-pointer"
-                                    >
-                                      View Product
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleProductCardClick(p.title, "Agent Purchase Initiated")}
-                                      className="flex-1 py-2 bg-cf-orange hover:bg-cf-darkOrange text-white rounded-xl text-center text-xs font-bold transition shadow-sm cursor-pointer"
-                                    >
-                                      Buy via Agent
-                                    </button>
+                                  <div className="absolute bottom-2.5 right-2.5 bg-cf-orange text-white font-extrabold text-sm px-2.5 py-1 rounded-lg shadow-md">
+                                    ${p.price} USD
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
 
-                        {/* If NOT from Cloudflare Registry: Natural Big Brand (Walmart) Listings */}
-                        {!msg.queryResults?.isFromCloudflareRegistry && msg.queryResults?.walmartProducts && (
-                          <div className="space-y-4 mt-2">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                              {msg.queryResults.walmartProducts.map((p) => (
-                                <div
-                                  key={p.id}
-                                  className="bg-[#262626] border border-[#3E3E3E] rounded-2xl p-4 space-y-3 shadow-md"
-                                >
-                                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black/40">
-                                    <img
-                                      src={p.imageUrl}
-                                      alt={p.title}
-                                      className="w-full h-full object-cover"
-                                    />
-                                    <div className="absolute top-2.5 left-2.5 bg-blue-900/90 text-blue-200 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-400/30">
-                                      {p.badge}
-                                    </div>
-                                    <div className="absolute bottom-2.5 right-2.5 bg-blue-600 text-white font-extrabold text-sm px-2.5 py-1 rounded-lg">
-                                      ${p.price} USD
-                                    </div>
-                                  </div>
-
-                                  <div>
-                                    <div className="text-base font-bold text-white line-clamp-1">{p.title}</div>
-                                    <div className="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">
-                                      {p.description}
-                                    </div>
-                                  </div>
-
-                                  <div className="flex items-center justify-between pt-2 border-t border-[#333] text-xs">
-                                    <span className="text-gray-400">Store:</span>
-                                    <span className="text-blue-400 font-bold">{p.retailer}</span>
-                                  </div>
-
-                                  {/* In-App Mock Actions (No actual redirect) */}
-                                  <div className="pt-1">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleProductCardClick(p.title, "Selected Walmart Item")}
-                                      className="w-full py-2 bg-[#333] hover:bg-[#3D3D3D] text-gray-200 rounded-xl text-center text-xs font-semibold transition cursor-pointer"
-                                    >
-                                      View on {p.retailer}
-                                    </button>
+                                <div>
+                                  <div className="text-base font-bold text-white line-clamp-1">{p.title}</div>
+                                  <div className="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">
+                                    {p.description}
                                   </div>
                                 </div>
-                              ))}
-                            </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-[#333] text-xs">
+                                  <span className="text-gray-400 font-medium">Merchant:</span>
+                                  <span className="text-cf-orange font-bold font-mono">parda.com</span>
+                                </div>
+
+                                <div className="flex items-center space-x-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleProductCardClick(p.title, "View Details")}
+                                    className="flex-1 py-2 bg-[#333] hover:bg-[#444] text-white rounded-xl text-center text-xs font-semibold transition cursor-pointer"
+                                  >
+                                    View Product
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleProductCardClick(p.title, "Agent Purchase Initiated")}
+                                    className="flex-1 py-2 bg-cf-orange hover:bg-cf-darkOrange text-white rounded-xl text-center text-xs font-bold transition shadow-sm cursor-pointer"
+                                  >
+                                    Buy via Agent
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+
+                            {/* RETAIL PRODUCTS (Walmart / Target) */}
+                            {msg.queryResults?.retailProducts?.map((p) => (
+                              <div
+                                key={p.id}
+                                className="bg-[#262626] border border-[#3E3E3E] rounded-2xl p-4 space-y-3 shadow-md"
+                              >
+                                <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black/40">
+                                  <img
+                                    src={p.imageUrl}
+                                    alt={p.title}
+                                    className="w-full h-full object-cover"
+                                  />
+                                  <div className={`absolute top-2.5 left-2.5 text-xs font-semibold px-2.5 py-1 rounded-full border shadow-sm ${
+                                    p.retailer === 'Walmart' 
+                                      ? 'bg-blue-900/90 text-blue-200 border-blue-400/30' 
+                                      : 'bg-red-900/90 text-red-200 border-red-400/30'
+                                  }`}>
+                                    {p.badge}
+                                  </div>
+                                  <div className="absolute bottom-2.5 right-2.5 bg-slate-800 text-white font-extrabold text-sm px-2.5 py-1 rounded-lg">
+                                    ${p.price} USD
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <div className="text-base font-bold text-white line-clamp-1">{p.title}</div>
+                                  <div className="text-xs text-gray-400 line-clamp-2 mt-1 leading-relaxed">
+                                    {p.description}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-2 border-t border-[#333] text-xs">
+                                  <span className="text-gray-400">Store:</span>
+                                  <span className="text-gray-200 font-bold">{p.retailer}</span>
+                                </div>
+
+                                <div className="pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleProductCardClick(p.title, `Selected ${p.retailer} Item`)}
+                                    className="w-full py-2 bg-[#333] hover:bg-[#3D3D3D] text-gray-200 rounded-xl text-center text-xs font-semibold transition cursor-pointer"
+                                  >
+                                    View on {p.retailer}
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        )}
+                        </div>
 
                         {/* Action buttons under response */}
                         <div className="flex items-center space-x-4 text-gray-500 pt-2 text-sm">
@@ -406,7 +394,6 @@ export const ChatGPTInterface: React.FC = () => {
                 </div>
               ))}
 
-              {/* Chat Loading Skeleton */}
               {isChatLoading && (
                 <div className="flex items-start space-x-4">
                   <div className="w-8 h-8 rounded-full bg-[#10A37F] flex items-center justify-center text-white text-sm font-bold animate-pulse">
@@ -427,11 +414,10 @@ export const ChatGPTInterface: React.FC = () => {
           )}
         </div>
 
-        {/* Bottom Pill Input Form (Direct replica of image 3) */}
+        {/* Bottom Pill Input Form */}
         <div className="p-5 md:px-16 bg-gradient-to-t from-[#212121] via-[#212121] to-transparent flex-shrink-0">
           <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
             <div className="relative bg-[#2F2F2F] border border-[#3E3E3E] rounded-full px-5 py-3.5 flex items-center space-x-3.5 shadow-xl focus-within:border-gray-500 transition">
-              {/* Plus icon */}
               <button
                 type="button"
                 className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-[#3D3D3D] transition cursor-pointer"
@@ -439,7 +425,6 @@ export const ChatGPTInterface: React.FC = () => {
                 <Plus className="w-5 h-5" />
               </button>
 
-              {/* Input text */}
               <input
                 type="text"
                 value={inputQuery}
@@ -448,7 +433,6 @@ export const ChatGPTInterface: React.FC = () => {
                 className="flex-1 bg-transparent text-white text-base focus:outline-none placeholder-gray-400"
               />
 
-              {/* Mic & Waveform or Send */}
               {inputQuery.trim() ? (
                 <button
                   type="submit"
@@ -469,7 +453,6 @@ export const ChatGPTInterface: React.FC = () => {
               )}
             </div>
 
-            {/* "What can you do?" button from image 3 */}
             {messages.length === 0 && (
               <div className="flex justify-center mt-3.5">
                 <button
@@ -482,7 +465,6 @@ export const ChatGPTInterface: React.FC = () => {
               </div>
             )}
 
-            {/* Disclaimer text from image 3 */}
             <div className="text-center text-xs text-gray-500 mt-2.5">
               ChatGPT is AI. By using it, you agree to our Terms & Privacy Policy. Discovering merchants via Cloudflare UCP Open Registry.
             </div>
