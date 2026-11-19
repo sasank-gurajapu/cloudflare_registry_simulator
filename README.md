@@ -1,5 +1,7 @@
 # Cloudflare Registry Simulator (Merchant & Shopper)
 
+> 🌐 **Live Online Simulator**: [https://sasank-gurajapu.github.io/cloudflare_registry_simulator/](https://sasank-gurajapu.github.io/cloudflare_registry_simulator/)
+
 A high-fidelity interactive simulator demonstrating the **Cloudflare Open Registry** and the **Universal Commerce Protocol (UCP)**.
 
 The registry is a neutral, open index that lets AI shopping agents (e.g., ChatGPT, Claude, Perplexity) answer *"who sells X?"* for small and independent merchants like **ParDa**, allowing independent labels to be discovered by AI agents rather than having queries dominated exclusively by big retail monopolies (Walmart, etc.).
