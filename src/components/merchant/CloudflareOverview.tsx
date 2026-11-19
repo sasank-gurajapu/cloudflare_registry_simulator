@@ -8,14 +8,13 @@ export const CloudflareOverview: React.FC = () => {
     metrics, 
     isOptedIn, 
     toggleOptIn, 
-    setMerchantSection,
-    agentReadinessScore 
+    setMerchantSection 
   } = useSimulator();
   
   const [timeRange, setTimeRange] = useState<'24h' | '7d' | '30d'>('24h');
 
   return (
-    <div className="flex-1 overflow-y-auto p-8 bg-white font-sans text-gray-800 space-y-7">
+    <div className="flex-1 overflow-y-auto p-8 lg:p-10 bg-white font-sans text-gray-800 space-y-7">
       {/* Title & Top Meta */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -32,38 +31,38 @@ export const CloudflareOverview: React.FC = () => {
           </p>
         </div>
 
-        <button className="flex items-center space-x-1.5 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-sm transition self-start sm:self-auto cursor-pointer">
+        <button className="flex items-center space-x-1.5 px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 shadow-xs transition self-start sm:self-auto cursor-pointer">
           <Plus className="w-4 h-4" />
           <span>Add tag</span>
         </button>
       </div>
 
       {/* AI Commerce Registry Notification Banner */}
-      <div className={`p-5 rounded-xl border transition shadow-sm ${
+      <div className={`p-5 rounded-2xl border transition shadow-xs ${
         isOptedIn 
           ? 'bg-gradient-to-r from-orange-50/70 to-emerald-50/50 border-orange-200' 
           : 'bg-gradient-to-r from-amber-50/70 to-orange-50/50 border-amber-200'
       }`}>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start space-x-3.5">
-            <div className={`p-2.5 rounded-xl flex-shrink-0 ${isOptedIn ? 'bg-orange-500 text-white shadow-sm' : 'bg-amber-100 text-amber-700'}`}>
+            <div className={`p-2.5 rounded-xl flex-shrink-0 ${isOptedIn ? 'bg-orange-500 text-white shadow-xs' : 'bg-amber-100 text-amber-700'}`}>
               <Sparkles className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center space-x-2.5">
                 <h3 className="text-base font-bold text-gray-900">
-                  {isOptedIn ? 'Cloudflare Open Registry: Active (UCP Format)' : 'AI Agent Discovery & Registry Listing'}
+                  {isOptedIn ? 'AI Agent Discovery: Active (UCP Format)' : 'AI Agent Discovery & UCP Registry'}
                 </h3>
                 <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
                   isOptedIn ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                 }`}>
-                  Score: {agentReadinessScore}%
+                  {isOptedIn ? 'Active' : 'Action Recommended'}
                 </span>
               </div>
               <p className="text-sm text-gray-600 mt-1 max-w-2xl leading-relaxed">
                 {isOptedIn 
-                  ? 'ParDa is actively listed in the neutral registry. AI shopping agents like ChatGPT and Claude discover your handcrafted products in machine-readable UCP format.'
-                  : 'Without registry opt-in, AI shopping queries only discover large retail brands like Walmart. Opt-in allows agents to answer "who sells X?" with ParDa.'}
+                  ? 'ParDa is actively discoverable across AI shopping assistants (ChatGPT, Claude, Perplexity) in machine-readable UCP format.'
+                  : 'Opt-in to be actively discovered by AI agents when shoppers ask for women\'s bags and handcrafted leather goods.'}
               </p>
             </div>
           </div>
@@ -77,7 +76,7 @@ export const CloudflareOverview: React.FC = () => {
             </button>
             <button
               onClick={() => toggleOptIn()}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm cursor-pointer ${
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition shadow-xs cursor-pointer ${
                 isOptedIn
                   ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
                   : 'bg-cf-orange text-white hover:bg-cf-darkOrange'
@@ -118,7 +117,7 @@ export const CloudflareOverview: React.FC = () => {
       </div>
 
       {/* Chart 1: Unique Visitors */}
-      <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:border-gray-300 transition">
+      <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-xs hover:border-gray-300 transition">
         <div className="flex items-start justify-between">
           <div>
             <div className="text-sm text-gray-500 font-medium">Unique Visitors</div>
@@ -133,7 +132,6 @@ export const CloudflareOverview: React.FC = () => {
           </div>
         </div>
 
-        {/* Chart SVG */}
         <div className="mt-5 h-36 w-full relative">
           <svg className="w-full h-full overflow-visible" viewBox="0 0 600 120" preserveAspectRatio="none">
             <line x1="0" y1="20" x2="600" y2="20" stroke="#f1f5f9" strokeDasharray="3 3" />
@@ -166,7 +164,7 @@ export const CloudflareOverview: React.FC = () => {
       </div>
 
       {/* Chart 2: Total Requests */}
-      <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:border-gray-300 transition">
+      <div className="border border-gray-200 rounded-2xl p-6 bg-white shadow-xs hover:border-gray-300 transition">
         <div className="flex items-start justify-between">
           <div>
             <div className="text-sm text-gray-500 font-medium">Total Requests</div>
@@ -185,43 +183,6 @@ export const CloudflareOverview: React.FC = () => {
 
             <path
               d="M 0 100 L 50 90 L 100 85 L 150 60 L 200 55 L 230 15 L 260 55 L 300 55 L 350 95 L 400 90 L 450 98 L 500 80 L 550 95 L 600 88"
-              fill="none"
-              stroke="#0284C7"
-              strokeWidth="2.5"
-            />
-          </svg>
-
-          <div className="flex justify-between text-xs text-gray-400 font-mono mt-3">
-            <span>12 PM</span>
-            <span>4 PM</span>
-            <span>8 PM</span>
-            <span>12 AM</span>
-            <span>4 AM</span>
-            <span>8 AM</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Chart 3: Percent Cached */}
-      <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:border-gray-300 transition">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="text-sm text-gray-500 font-medium">Percent Cached</div>
-            <div className="text-3xl font-extrabold text-gray-900 mt-1">
-              {metrics.percentCached}%
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-4 h-32 w-full relative">
-          <svg className="w-full h-full overflow-visible" viewBox="0 0 600 100" preserveAspectRatio="none">
-            <line x1="0" y1="20" x2="600" y2="20" stroke="#f1f5f9" strokeDasharray="3 3" />
-            <line x1="0" y1="50" x2="600" y2="50" stroke="#f1f5f9" strokeDasharray="3 3" />
-            <line x1="0" y1="80" x2="600" y2="80" stroke="#f1f5f9" strokeDasharray="3 3" />
-            <line x1="0" y1="95" x2="600" y2="95" stroke="#e2e8f0" />
-
-            <path
-              d="M 0 95 L 240 95 L 270 20 L 300 95 L 600 95"
               fill="none"
               stroke="#0284C7"
               strokeWidth="2.5"

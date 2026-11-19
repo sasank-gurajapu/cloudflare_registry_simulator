@@ -7,8 +7,7 @@ import {
   RotateCcw, 
   Play, 
   CheckCircle2, 
-  ShieldAlert,
-  ArrowRightLeft
+  ShieldAlert
 } from 'lucide-react';
 
 export const HeaderNavigation: React.FC = () => {
@@ -29,34 +28,32 @@ export const HeaderNavigation: React.FC = () => {
   };
 
   return (
-    <header className="h-14 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-6 text-sm font-sans select-none z-30 shadow-md">
+    <header className="h-14 bg-slate-950 border-b border-slate-800 flex items-center justify-between px-5 text-sm font-sans select-none z-30 shadow-md">
       {/* Brand & Concept */}
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-2.5">
-          {/* Cloudflare Orange Cloud Mini */}
-          <div className="w-6 h-6 text-cf-orange">
+      <div className="flex items-center space-x-3 flex-shrink-0">
+        <div className="flex items-center space-x-2">
+          {/* Cloudflare Orange Cloud Icon */}
+          <div className="w-6 h-6 text-cf-orange flex-shrink-0">
             <svg viewBox="0 0 24 24" className="w-full h-full fill-current">
               <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/>
             </svg>
           </div>
-          <div>
-            <span className="font-bold text-white text-base tracking-tight">
-              Cloudflare Registry Simulator
-            </span>
-            <span className="ml-2 text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full font-mono">
-              UCP Protocol
-            </span>
-          </div>
+          <span className="font-bold text-white text-sm md:text-base tracking-tight">
+            Cloudflare Registry Simulator
+          </span>
+          <span className="text-[11px] bg-orange-500/20 text-orange-400 border border-orange-500/30 px-2 py-0.5 rounded-full font-mono hidden sm:inline">
+            UCP Protocol
+          </span>
         </div>
       </div>
 
-      {/* Main View Switcher (Full Screen Views) */}
-      <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 shadow-inner">
+      {/* Main View Switcher */}
+      <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 shadow-inner flex-shrink-0">
         <button
           onClick={() => setActiveTab('merchant')}
-          className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition ${
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
             activeTab === 'merchant'
-              ? 'bg-orange-500 text-white font-semibold shadow-md'
+              ? 'bg-cf-orange text-white font-bold shadow-md'
               : 'text-slate-400 hover:text-white'
           }`}
         >
@@ -66,9 +63,9 @@ export const HeaderNavigation: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('shopper')}
-          className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition ${
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
             activeTab === 'shopper'
-              ? 'bg-emerald-600 text-white font-semibold shadow-md'
+              ? 'bg-emerald-600 text-white font-bold shadow-md'
               : 'text-slate-400 hover:text-white'
           }`}
         >
@@ -78,22 +75,22 @@ export const HeaderNavigation: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('registry')}
-          className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition ${
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
             activeTab === 'registry'
-              ? 'bg-blue-600 text-white font-semibold shadow-md'
+              ? 'bg-blue-600 text-white font-bold shadow-md'
               : 'text-slate-400 hover:text-white'
           }`}
         >
           <Globe className="w-4 h-4" />
-          <span>Registry & UCP Inspector</span>
+          <span>UCP Inspector</span>
         </button>
       </div>
 
-      {/* Interactive Controls & Scenario Triggers */}
-      <div className="flex items-center space-x-3">
+      {/* Right Controls */}
+      <div className="flex items-center space-x-3 flex-shrink-0">
         {/* ParDa Opt-in quick toggle */}
-        <div className="flex items-center space-x-2.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">
-          <span className="text-slate-400 text-xs font-medium">ParDa Registry:</span>
+        <div className="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">
+          <span className="text-slate-400 text-xs font-medium hidden md:inline">ParDa:</span>
           
           <button
             type="button"
@@ -112,43 +109,26 @@ export const HeaderNavigation: React.FC = () => {
             />
           </button>
 
-          <button
-            onClick={() => toggleOptIn()}
-            className={`flex items-center space-x-1.5 text-xs font-semibold px-2 py-0.5 rounded transition cursor-pointer ${
-              isOptedIn
-                ? 'bg-emerald-950 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/60'
-                : 'bg-amber-950 text-amber-400 border border-amber-800 hover:bg-amber-900/60'
-            }`}
-          >
-            {isOptedIn ? (
-              <>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Opted In</span>
-              </>
-            ) : (
-              <>
-                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                <span>Not Opted In</span>
-              </>
-            )}
-          </button>
+          <span className={`text-xs font-bold ${isOptedIn ? 'text-emerald-400' : 'text-slate-400'}`}>
+            {isOptedIn ? 'Opted In' : 'Off'}
+          </span>
         </div>
 
-        {/* Quick Demo Trigger: "Women's bag under $200" */}
+        {/* Quick Demo Trigger Button */}
         <button
           onClick={handleRunDemoQuery}
           disabled={isChatLoading}
-          className="flex items-center space-x-2 px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-lg font-medium text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
+          className="flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl font-bold text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span>Test Prompt: "Women's bag under $200"</span>
+          <span>Test Prompt</span>
         </button>
 
         {/* Reset Demo */}
         <button
           onClick={resetDemo}
           title="Reset Simulator"
-          className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
         >
           <RotateCcw className="w-4 h-4" />
         </button>

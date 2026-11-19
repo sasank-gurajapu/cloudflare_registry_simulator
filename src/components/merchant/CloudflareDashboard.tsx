@@ -4,13 +4,12 @@ import { CloudflareNavbar } from './CloudflareNavbar';
 import { CloudflareSidebar } from './CloudflareSidebar';
 import { CloudflareOverview } from './CloudflareOverview';
 import { CloudflareAgentReadiness } from './CloudflareAgentReadiness';
-import { CloudflareRightPanel } from './CloudflareRightPanel';
 
 export const CloudflareDashboard: React.FC = () => {
   const { merchantSection } = useSimulator();
 
   return (
-    <div className="flex flex-col h-full bg-white text-gray-900 overflow-hidden font-sans border-r border-gray-300">
+    <div className="flex flex-col h-full w-full bg-white text-gray-900 overflow-hidden font-sans">
       {/* Cloudflare Top Header */}
       <CloudflareNavbar />
 
@@ -19,16 +18,13 @@ export const CloudflareDashboard: React.FC = () => {
         {/* Left Sidebar */}
         <CloudflareSidebar />
 
-        {/* Center Content: Overview or Agent Readiness */}
-        <div className="flex-1 flex overflow-hidden">
+        {/* Center Content: Overview or Agent Readiness (Full Width now!) */}
+        <div className="flex-1 flex overflow-hidden bg-white">
           {merchantSection === 'overview' ? (
             <CloudflareOverview />
           ) : (
             <CloudflareAgentReadiness />
           )}
-
-          {/* Right Info Sidebar (as shown in reference image 1) */}
-          <CloudflareRightPanel />
         </div>
       </div>
     </div>
