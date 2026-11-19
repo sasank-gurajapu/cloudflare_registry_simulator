@@ -57,5 +57,5 @@ export interface AITrendItem {
   agentSummary: string;
 }
 
-export type SimulatorTab = 'merchant' | 'shopper';
+export type SimulatorTab = 'merchant' | 'shopper' | 'trends' | 'registry';
 export type MerchantSection = 'overview' | 'agent-readiness' | 'analytics' | 'caching' | 'dns';

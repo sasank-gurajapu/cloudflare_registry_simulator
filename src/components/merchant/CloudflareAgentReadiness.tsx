@@ -1,120 +1,25 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useSimulator } from '../../context/SimulatorContext';
 import { 
   Bot, 
   Sparkles, 
   TrendingUp, 
   ShoppingBag,
-  ChevronDown,
-  Calendar,
-  Layers,
-  ArrowUpRight,
-  Filter
+  ArrowRight,
+  Radio
 } from 'lucide-react';
-import { AITrendItem } from '../../types/simulator';
 
 export const CloudflareAgentReadiness: React.FC = () => {
   const { 
     isOptedIn, 
     toggleOptIn, 
     products, 
-    metrics, 
-    aiTrends, 
-    selectedTrend, 
-    setSelectedTrend 
+    metrics,
+    setActiveTab 
   } = useSimulator();
 
-  // Mini sparkline SVG generator
-  const renderSparkline = (points: number[], isSelected: boolean = false) => {
-    const max = Math.max(...points);
-    const min = Math.min(...points);
-    const range = max - min || 1;
-    const width = 120;
-    const height = 36;
-    
-    const svgPoints = points
-      .map((p, i) => {
-        const x = (i / (points.length - 1)) * width;
-        const y = height - ((p - min) / range) * (height - 8) - 4;
-        return `${x},${y}`;
-      })
-      .join(' ');
-
-    return (
-      <svg className="w-28 h-9 overflow-visible" viewBox={`0 0 ${width} ${height}`}>
-        <polyline
-          fill="none"
-          stroke={isSelected ? '#34D399' : '#10B981'}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          points={svgPoints}
-        />
-      </svg>
-    );
-  };
-
-  // Detailed larger chart for the granular breakdown panel
-  const renderLargeSparkline = (points: number[]) => {
-    const max = Math.max(...points);
-    const min = Math.min(...points);
-    const range = max - min || 1;
-    const width = 360;
-    const height = 110;
-    
-    const linePoints = points.map((p, i) => {
-      const x = (i / (points.length - 1)) * width;
-      const y = height - ((p - min) / range) * (height - 20) - 10;
-      return { x, y };
-    });
-
-    const polylineStr = linePoints.map(pt => `${pt.x},${pt.y}`).join(' ');
-    const areaStr = `0,${height} ` + polylineStr + ` ${width},${height}`;
-
-    return (
-      <div className="relative w-full h-28 my-3">
-        <svg className="w-full h-full" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-          <defs>
-            <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-            </linearGradient>
-          </defs>
-          {/* Subtle grid lines */}
-          <line x1="0" y1="30" x2={width} y2="30" stroke="#334155" strokeDasharray="3 3" opacity="0.4" />
-          <line x1="0" y1="70" x2={width} y2="70" stroke="#334155" strokeDasharray="3 3" opacity="0.4" />
-          
-          <polygon fill="url(#trendGradient)" points={areaStr} />
-          <polyline
-            fill="none"
-            stroke="#10B981"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            points={polylineStr}
-          />
-          {/* Current dot */}
-          {linePoints.length > 0 && (
-            <circle
-              cx={linePoints[linePoints.length - 1].x}
-              cy={linePoints[linePoints.length - 1].y}
-              r="4.5"
-              fill="#34D399"
-              stroke="#064E3B"
-              strokeWidth="2"
-            />
-          )}
-        </svg>
-        <div className="flex justify-between text-[11px] text-gray-400 font-mono mt-1">
-          <span>7 days ago</span>
-          <span>now</span>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="flex-1 overflow-y-auto p-8 lg:p-10 bg-white font-sans text-gray-800 space-y-8">
+    <div className="flex-1 overflow-y-auto p-8 lg:p-10 bg-white font-sans text-gray-800 space-y-8 select-none">
       {/* Top Header & Main Toggle */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-200">
         <div>
@@ -208,8 +113,8 @@ export const CloudflareAgentReadiness: React.FC = () => {
             <div className="p-5 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Agent Queries Today</span>
-                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                  Live Index
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex items-center">
+                  <Radio className="w-3 h-3 mr-0.5 animate-pulse" /> Live
                 </span>
               </div>
               <div className="text-3xl font-extrabold text-cf-blue font-mono">
@@ -232,169 +137,6 @@ export const CloudflareAgentReadiness: React.FC = () => {
               </div>
               <div className="text-xs text-gray-400">
                 Machine-readable UCP endpoints
-              </div>
-            </div>
-          </div>
-
-          {/* NEW SECTION: AI SHOPPING TRENDS (Inspired directly by Google Trends) */}
-          <div className="bg-[#1E1F20] text-gray-100 rounded-2xl p-6 lg:p-7 shadow-lg border border-[#303134] space-y-6">
-            {/* Trends Section Header & Filter Pills */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#303134]">
-              <div>
-                <div className="flex items-center space-x-2 text-xs text-emerald-400 font-bold uppercase tracking-wider">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>AI Agent Search Intelligence</span>
-                </div>
-                <h2 className="text-2xl font-bold text-white mt-1">
-                  AI Shopping Trends
-                </h2>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  Macro shopper queries from AI agents aggregated into categories and demand volume.
-                </p>
-              </div>
-
-              {/* Filter Pills (Google Trends Style) */}
-              <div className="flex flex-wrap items-center gap-2 text-xs">
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
-                  <span>United States</span>
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
-                </div>
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
-                  <Calendar className="w-3 h-3 text-gray-400" />
-                  <span>Past 7 days</span>
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
-                </div>
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#2D2E31] border border-[#3C4043] rounded-full text-gray-200 cursor-pointer hover:bg-[#383A3E] transition">
-                  <ShoppingBag className="w-3 h-3 text-gray-400" />
-                  <span>Shopping</span>
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
-                </div>
-              </div>
-            </div>
-
-            {/* Master-Detail Trends View (Matching Google Trends screenshot) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Macro Trends Table (7 columns) */}
-              <div className="lg:col-span-7 overflow-x-auto">
-                <table className="w-full text-left text-xs font-sans">
-                  <thead>
-                    <tr className="border-b border-[#303134] text-gray-400 text-[11px] font-semibold">
-                      <th className="pb-3 pl-2">AI Search Query</th>
-                      <th className="pb-3 px-3">Volume</th>
-                      <th className="pb-3 px-3">Started</th>
-                      <th className="pb-3 pr-2 text-right">Past 7 days</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#2B2C2F]">
-                    {aiTrends.map((trend) => {
-                      const isSelected = selectedTrend.id === trend.id;
-                      return (
-                        <tr
-                          key={trend.id}
-                          onClick={() => setSelectedTrend(trend)}
-                          className={`cursor-pointer transition group ${
-                            isSelected 
-                              ? 'bg-[#2B2C2F] text-white font-medium' 
-                              : 'hover:bg-[#252628] text-gray-300'
-                          }`}
-                        >
-                          {/* Query & Selection indicator */}
-                          <td className="py-3.5 pl-2">
-                            <div className="flex items-center space-x-2.5">
-                              <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-emerald-400' : 'bg-transparent group-hover:bg-gray-600'}`}></div>
-                              <span className="text-sm font-semibold group-hover:text-white transition">
-                                {trend.query}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Volume & Growth */}
-                          <td className="py-3.5 px-3 font-mono">
-                            <div className="text-xs font-bold text-gray-100">{trend.volume}</div>
-                            <div className="text-[10px] text-emerald-400 font-semibold">{trend.growth}</div>
-                          </td>
-
-                          {/* Started & Active Status */}
-                          <td className="py-3.5 px-3">
-                            <div className="text-xs text-gray-300">{trend.started}</div>
-                            <div className="text-[10px] text-emerald-400 flex items-center space-x-1 mt-0.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                              <span>Active</span>
-                            </div>
-                          </td>
-
-                          {/* Sparkline Graph */}
-                          <td className="py-3.5 pr-2 text-right">
-                            <div className="flex justify-end">
-                              {renderSparkline(trend.sparklinePoints, isSelected)}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Granular Category Breakdown Panel (5 columns, matching image 4) */}
-              <div className="lg:col-span-5 bg-[#252628] border border-[#3C4043] rounded-2xl p-5 space-y-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-[11px] text-emerald-400 font-bold uppercase tracking-wider">
-                      Granular Breakdown
-                    </span>
-                    <h3 className="text-lg font-bold text-white mt-0.5">
-                      {selectedTrend.query}
-                    </h3>
-                  </div>
-                  <span className="text-xs bg-[#303134] text-gray-300 px-2.5 py-1 rounded-full font-mono">
-                    {selectedTrend.volume} total
-                  </span>
-                </div>
-
-                {/* Prominent Trend Graph */}
-                {renderLargeSparkline(selectedTrend.sparklinePoints)}
-
-                {/* Sub-Category Aggregated Intent */}
-                <div className="space-y-3 pt-1 border-t border-[#35373A]">
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-300">
-                    <span className="flex items-center space-x-1">
-                      <Layers className="w-3.5 h-3.5 text-cf-orange" />
-                      <span>Aggregated Category Distribution</span>
-                    </span>
-                    <span className="text-gray-400 text-[11px]">Share</span>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    {selectedTrend.categoryBreakdown.map((item, idx) => (
-                      <div key={idx} className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-300">{item.category}</span>
-                          <span className="font-mono text-gray-200 font-semibold">
-                            {item.percentage}% ({item.queryCount})
-                          </span>
-                        </div>
-                        <div className="w-full bg-[#35373A] rounded-full h-1.5">
-                          <div 
-                            className="bg-emerald-400 h-1.5 rounded-full transition-all duration-500" 
-                            style={{ width: `${item.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Agent Query Insight Summary */}
-                <div className="p-3 bg-[#1E1F20] border border-[#3C4043] rounded-xl text-xs text-gray-300 space-y-1">
-                  <div className="font-bold text-white flex items-center space-x-1.5">
-                    <Bot className="w-3.5 h-3.5 text-cf-blue" />
-                    <span>AI Shopper Query Pattern:</span>
-                  </div>
-                  <p className="text-[11px] text-gray-400 leading-relaxed">
-                    {selectedTrend.agentSummary}
-                  </p>
-                </div>
               </div>
             </div>
           </div>
@@ -430,6 +172,55 @@ export const CloudflareAgentReadiness: React.FC = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Traffic by Assistant Breakdown */}
+          <div className="p-6 bg-white border border-gray-200 rounded-2xl shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-gray-900 flex items-center space-x-2">
+                <Bot className="w-4 h-4 text-cf-blue" />
+                <span>Traffic Distribution by AI Assistant</span>
+              </h3>
+              <button
+                onClick={() => setActiveTab('trends')}
+                className="text-xs text-cf-blue hover:underline font-bold flex items-center space-x-1 cursor-pointer"
+              >
+                <span>Explore AI Trends</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gray-700">ChatGPT (OpenAI)</span>
+                  <span className="text-gray-900 font-bold">65%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '65%' }}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gray-700">Claude (Anthropic)</span>
+                  <span className="text-gray-900 font-bold">22%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-cf-orange h-2 rounded-full" style={{ width: '22%' }}></div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gray-700">Perplexity AI</span>
+                  <span className="text-gray-900 font-bold">13%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-cf-blue h-2 rounded-full" style={{ width: '13%' }}></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

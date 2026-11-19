@@ -4,7 +4,9 @@ import {
   Store, 
   Bot, 
   RotateCcw, 
-  Play
+  Play,
+  TrendingUp,
+  Globe
 } from 'lucide-react';
 
 export const HeaderNavigation: React.FC = () => {
@@ -43,11 +45,11 @@ export const HeaderNavigation: React.FC = () => {
         </div>
       </div>
 
-      {/* Main View Switcher (Just Merchant and Shopper) */}
+      {/* Main View Switcher (4 Clean Tabs) */}
       <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-1 shadow-inner flex-shrink-0">
         <button
           onClick={() => setActiveTab('merchant')}
-          className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
             activeTab === 'merchant'
               ? 'bg-cf-orange text-white font-bold shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -59,7 +61,7 @@ export const HeaderNavigation: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('shopper')}
-          className={`flex items-center space-x-2 px-4 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
             activeTab === 'shopper'
               ? 'bg-emerald-600 text-white font-bold shadow-md'
               : 'text-slate-400 hover:text-white'
@@ -67,6 +69,30 @@ export const HeaderNavigation: React.FC = () => {
         >
           <Bot className="w-4 h-4" />
           <span>Shopper (ChatGPT)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('trends')}
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
+            activeTab === 'trends'
+              ? 'bg-white text-gray-900 font-bold shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4 text-emerald-500" />
+          <span>AI Shopping Trends</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('registry')}
+          className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg text-xs md:text-sm font-medium transition cursor-pointer ${
+            activeTab === 'registry'
+              ? 'bg-blue-600 text-white font-bold shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Globe className="w-4 h-4" />
+          <span>UCP Registry Flow</span>
         </button>
       </div>
 
@@ -105,7 +131,7 @@ export const HeaderNavigation: React.FC = () => {
           className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl font-bold text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span>Test: "Women's bag under $200"</span>
+          <span>Test Prompt</span>
         </button>
 
         {/* Reset Demo */}

@@ -3,6 +3,8 @@ import { useSimulator } from './context/SimulatorContext';
 import { HeaderNavigation } from './components/common/HeaderNavigation';
 import { CloudflareDashboard } from './components/merchant/CloudflareDashboard';
 import { ChatGPTInterface } from './components/shopper/ChatGPTInterface';
+import { AITrendsView } from './components/trends/AITrendsView';
+import { RegistryDataFlowView } from './components/registry/RegistryDataFlowView';
 
 export const AppContent: React.FC = () => {
   const { activeTab } = useSimulator();
@@ -23,6 +25,18 @@ export const AppContent: React.FC = () => {
         {activeTab === 'shopper' && (
           <div className="flex-1 h-full w-full overflow-hidden">
             <ChatGPTInterface />
+          </div>
+        )}
+
+        {activeTab === 'trends' && (
+          <div className="flex-1 h-full w-full overflow-hidden bg-white">
+            <AITrendsView />
+          </div>
+        )}
+
+        {activeTab === 'registry' && (
+          <div className="flex-1 h-full w-full overflow-hidden">
+            <RegistryDataFlowView />
           </div>
         )}
       </main>
